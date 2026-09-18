@@ -1,6 +1,8 @@
 """Live webcam preview with single and toggleable burst capture using OpenCV."""
 from datetime import datetime
 from pathlib import Path
+import ctypes
+import sys
 import time
 import cv2
 from ultralytics import YOLO
@@ -10,11 +12,11 @@ FRAME_WIDTH = 1280
 FRAME_HEIGHT = 720
 FPS = 30
 AUTO_EXPOSURE = True
-EXPOSURE = -6
+SHUTTER_SPEED = -6
 ISO = None
 CAPTURE_DIRECTORY = Path(__file__).resolve().parent / "captures"
 BURST_INTERVAL_SECONDS = 0.25
-WINDOW_TITLE = "Camera Preview | C: capture | B: burst on/off | Q/Esc: quit"
+WINDOW_TITLE = "Camera Preview | hold B: burst | C: capture | Q/Esc: quit"
 MODEL_PATH = Path(__file__).resolve().parent.parent / "ai-training" / "weights" / "best.pt"
 DETECTION_CONFIDENCE = 0.10
 
@@ -25,7 +27,7 @@ def configure_camera(camera: cv2.VideoCapture) -> None:
     camera.set(cv2.CAP_PROP_FPS, FPS)
     camera.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.75 if AUTO_EXPOSURE else 0.25)
     if not AUTO_EXPOSURE:
-        camera.set(cv2.CAP_PROP_EXPOSURE, EXPOSURE)
+        camera.set(cv2.CAP_PROP_EXPOSURE, SHUTTER_SPEED)
     if ISO is not None:
         camera.set(cv2.CAP_PROP_ISO_SPEED, ISO)
 
@@ -39,6 +41,12 @@ def save_frame(frame) -> Path:
     return output_path
 
 
+def burst_key_down() -> bool:
+    if sys.platform == "win32":
+        return bool(ctypes.windll.user32.GetAsyncKeyState(ord("B")) & 0x8000)
+    return False
+
+
 def main() -> None:
     backend = cv2.CAP_DSHOW if hasattr(cv2, "CAP_DSHOW") else cv2.CAP_ANY
     camera = cv2.VideoCapture(CAMERA_INDEX, backend)
@@ -47,7 +55,6 @@ def main() -> None:
     configure_camera(camera)
     detector = YOLO(str(MODEL_PATH)) if MODEL_PATH.is_file() else None
     cv2.namedWindow(WINDOW_TITLE, cv2.WINDOW_NORMAL)
-    burst_enabled = False
     last_burst_capture = 0.0
     try:
         while True:
@@ -58,7 +65,8 @@ def main() -> None:
             if detector is not None:
                 prediction = detector.predict(source=frame, conf=DETECTION_CONFIDENCE, verbose=False)[0]
                 preview = prediction.plot()
-            status = "BURST ON" if burst_enabled else "READY"
+            burst_enabled = burst_key_down()
+            status = "BURST ON - release B to stop" if burst_enabled else "READY"
             cv2.putText(preview, status, (20, 40), cv2.FONT_HERSHEY_SIMPLEX,
                         1, (0, 0, 255) if burst_enabled else (0, 200, 0), 2)
             cv2.imshow(WINDOW_TITLE, preview)
@@ -71,8 +79,7 @@ def main() -> None:
                 break
             if key in (ord("c"), ord("C")):
                 save_frame(frame)
-            if key in (ord("b"), ord("B")):
-                burst_enabled = not burst_enabled
+            if not burst_enabled:
                 last_burst_capture = 0.0
     finally:
         camera.release()

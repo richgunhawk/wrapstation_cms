@@ -68,5 +68,9 @@ scanButton.addEventListener('click', async () => {
         status.textContent = `Scan failed: ${error.message}`;
     }
 });
+
+if (new URLSearchParams(window.location.search).get('scan') === '1') {
+    scanButton.click();
+}
 </script>
 <?= $this->endSection() ?>
