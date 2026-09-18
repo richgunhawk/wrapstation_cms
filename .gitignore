@@ -1,0 +1,28 @@
+# Python artifacts and large local ML assets
+__pycache__/
+*.py[cod]
+.venv/
+ai-training/dataset/
+ai-training/runs/
+ai-training/images/
+ai-training/weights/*.pt
+!ai-training/weights/best.pt
+!ai-training/weights/.gitkeep
+
+# Camera captures
+iot-camera/captures/
+
+# CodeIgniter runtime and local secrets
+cms-codeigniter/.env
+cms-codeigniter/vendor/
+cms-codeigniter/writable/cache/*
+cms-codeigniter/writable/logs/*
+cms-codeigniter/writable/session/*
+!cms-codeigniter/writable/cache/index.html
+!cms-codeigniter/writable/logs/index.html
+!cms-codeigniter/writable/session/index.html
+
+# Local validation artifacts
+images/
+runs/
+ai-training/yolo11n.pt
