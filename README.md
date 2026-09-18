@@ -1,5 +1,7 @@
 # Full Stack Developer Technical Test - Wrapstation
 
+Richardus Sugeng Raharjo
+
 ## Spesifikasi sistem pengerjaan
 
 | Item | Spesifikasi |
