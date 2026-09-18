@@ -29,3 +29,5 @@ python api.py
 ```
 
 Then open the CMS at `http://localhost:8080`, choose `Add product`, allow browser camera access, and click `Scan camera`. The browser captures one frame, sends it to the local YOLO API, and fills `Product name` with the detected class. The API must remain running while scanning.
+
+The scanner includes resolution, shutter speed/exposure, and ISO controls. Resolution is applied directly; shutter speed and ISO only apply when supported by the browser and webcam driver.
