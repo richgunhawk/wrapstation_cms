@@ -28,3 +28,14 @@ python inference.py
 ```
 
 The script prints detected classes and confidence values, then opens an OpenCV popup with bounding boxes and labels.
+
+## CMS integration API
+
+Run the local API from the AI virtual environment:
+
+```powershell
+pip install -r requirements.txt
+python api.py
+```
+
+The `POST /predict` endpoint accepts an image field named `image` and returns the detected classes and their confidence values. The CMS Add Product form uses this endpoint for its camera scanner.

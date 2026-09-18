@@ -3,6 +3,7 @@ from datetime import datetime
 from pathlib import Path
 import time
 import cv2
+from ultralytics import YOLO
 
 CAMERA_INDEX = 0
 FRAME_WIDTH = 1280
@@ -14,6 +15,8 @@ ISO = None
 CAPTURE_DIRECTORY = Path(__file__).resolve().parent / "captures"
 BURST_INTERVAL_SECONDS = 0.25
 WINDOW_TITLE = "Camera Preview | C: capture | B: burst on/off | Q/Esc: quit"
+MODEL_PATH = Path(__file__).resolve().parent.parent / "ai-training" / "weights" / "best.pt"
+DETECTION_CONFIDENCE = 0.10
 
 
 def configure_camera(camera: cv2.VideoCapture) -> None:
@@ -42,6 +45,7 @@ def main() -> None:
     if not camera.isOpened():
         raise RuntimeError(f"Camera index {CAMERA_INDEX} cannot be opened.")
     configure_camera(camera)
+    detector = YOLO(str(MODEL_PATH)) if MODEL_PATH.is_file() else None
     cv2.namedWindow(WINDOW_TITLE, cv2.WINDOW_NORMAL)
     burst_enabled = False
     last_burst_capture = 0.0
@@ -51,6 +55,9 @@ def main() -> None:
             if not ok:
                 raise RuntimeError("Could not read a frame from the camera.")
             preview = frame.copy()
+            if detector is not None:
+                prediction = detector.predict(source=frame, conf=DETECTION_CONFIDENCE, verbose=False)[0]
+                preview = prediction.plot()
             status = "BURST ON" if burst_enabled else "READY"
             cv2.putText(preview, status, (20, 40), cv2.FONT_HERSHEY_SIMPLEX,
                         1, (0, 0, 255) if burst_enabled else (0, 200, 0), 2)

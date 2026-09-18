@@ -42,3 +42,7 @@ Nilai tersebut adalah baseline awal dari YOLO11n pada CPU dan belum tergolong ti
 Arsitektur yang digunakan adalah YOLO11n (nano), yaitu detector CNN satu tahap dengan backbone untuk ekstraksi fitur, neck untuk penggabungan fitur multi-skala, dan detection head untuk memprediksi bounding box, kelas, serta confidence.
 
 Dataset, folder hasil training, virtual environment, dan gambar lokal sengaja dikecualikan dari Git karena ukurannya besar. Evaluator dapat mengunduh dataset dan menjalankan ulang `train.py` mengikuti README pada `ai-training/`.
+
+## Camera and CMS integration
+
+`iot-camera/camera_capture.py` loads `ai-training/weights/best.pt` and overlays fruit detections on the live webcam preview. `ai-training/api.py` exposes a local `POST /predict` endpoint. The CMS Add Product form captures one browser camera frame, sends it to that endpoint, and fills the product name with the top detected fruit class.
